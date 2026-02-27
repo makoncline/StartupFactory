@@ -1,0 +1,12 @@
+{
+  "zone": "makon.dev",
+  "tunnelName": "startup-factory",
+  "originCertPath": ".cloudflare/cert.pem",
+  "apps": [
+    {
+      "name": "tanstack-start-ai-template",
+      "hostname": "tanstack-start-ai-template.makon.dev",
+      "port": 3000
+    }
+  ]
+}

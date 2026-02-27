@@ -1,0 +1,63 @@
+{
+  "name": "tanstack-start-ai-template",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --project jsdom",
+    "test:watch": "vitest --project jsdom",
+    "test:browser": "vitest run --project browser",
+    "test:all": "vitest run",
+    "pretest:e2e": "node scripts/kill-port.mjs 3000",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "pretest:e2e:update": "node scripts/kill-port.mjs 3000",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "verify": "npm run typecheck && npm run test && npm run test:browser && npm run test:e2e",
+    "lint": "eslint",
+    "format": "prettier --check .",
+    "check": "prettier --write . && eslint --fix"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/react-router": "^1.132.0",
+    "@tanstack/react-start": "^1.132.0",
+    "@tanstack/router-plugin": "^1.132.0",
+    "nitro": "npm:nitro-nightly@latest",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.1.18"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "@tanstack/eslint-config": "^0.3.0",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
+    "@testing-library/user-event": "14.6.1",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitest/browser": "4.0.18",
+    "@vitest/browser-playwright": "4.0.18",
+    "@vitejs/plugin-react": "^5.0.4",
+    "jsdom": "28.1.0",
+    "msw": "2.12.10",
+    "playwright": "1.58.2",
+    "prettier": "^3.5.3",
+    "typescript": "^5.7.2",
+    "vite": "^7.1.7",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "4.0.18"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
+}

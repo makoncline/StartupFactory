@@ -1,0 +1,6 @@
+{
+  "name": "@startup-factory/testing-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module"
+}

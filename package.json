@@ -1,0 +1,39 @@
+{
+  "name": "startup-factory",
+  "private": true,
+  "packageManager": "pnpm@10.15.0",
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "dev:template": "turbo run dev --filter=./apps/tanstack-start-ai-template",
+    "typecheck": "turbo run typecheck --filter=./apps/tanstack-start-ai-template",
+    "test": "turbo run test --filter=./apps/tanstack-start-ai-template",
+    "test:browser": "turbo run test:browser --filter=./apps/tanstack-start-ai-template",
+    "test:e2e": "turbo run test:e2e --filter=./apps/tanstack-start-ai-template",
+    "test:e2e:update": "turbo run test:e2e:update --filter=./apps/tanstack-start-ai-template",
+    "verify": "turbo run verify --filter=./apps/tanstack-start-ai-template",
+    "new:app": "node scripts/new-app.mjs",
+    "check:app": "node scripts/check-app-contract.mjs",
+    "tunnel:login": "node scripts/cloudflare-tunnel.mjs login",
+    "tunnel:init": "node scripts/cloudflare-tunnel.mjs init",
+    "tunnel:add": "node scripts/cloudflare-tunnel.mjs add",
+    "tunnel:run": "node scripts/cloudflare-tunnel.mjs run",
+    "tunnel:urls": "node scripts/cloudflare-tunnel.mjs urls"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.8"
+  },
+  "pnpm": {
+    "overrides": {
+      "vitest": "4.0.18",
+      "@vitest/browser": "4.0.18",
+      "@vitest/browser-playwright": "4.0.18",
+      "playwright": "1.58.2",
+      "@playwright/test": "1.58.2",
+      "msw": "2.12.10",
+      "@testing-library/react": "16.3.2",
+      "@testing-library/jest-dom": "6.9.1",
+      "@testing-library/user-event": "14.6.1",
+      "jsdom": "28.1.0"
+    }
+  }
+}

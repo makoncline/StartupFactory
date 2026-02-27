@@ -1,0 +1,45 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "typecheck": {
+      "outputs": []
+    },
+    "test": {
+      "outputs": []
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "test:browser": {
+      "outputs": []
+    },
+    "test:all": {
+      "outputs": []
+    },
+    "test:e2e": {
+      "cache": false,
+      "outputs": [
+        "playwright-report/**",
+        "test-results/**"
+      ]
+    },
+    "test:e2e:ui": {
+      "cache": false,
+      "persistent": true
+    },
+    "test:e2e:update": {
+      "cache": false,
+      "outputs": [
+        "e2e/**/*.spec.ts-snapshots/**"
+      ]
+    },
+    "verify": {
+      "outputs": []
+    }
+  }
+}
