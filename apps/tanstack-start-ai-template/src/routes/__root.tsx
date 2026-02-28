@@ -40,33 +40,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 function RootLayout() {
   return (
-    <div className="mx-auto w-[min(1160px,calc(100%-1rem))] py-4 md:py-7">
-      <header className="relative mb-7 overflow-hidden rounded-[28px] border-2 border-slate-900/15 bg-white/74 px-4 py-4 shadow-[0_22px_56px_rgba(13,20,34,0.18)] backdrop-blur-md md:px-6">
-        <div className="pointer-events-none absolute -top-8 -left-8 h-28 w-28 rounded-full bg-cyan-300/32 blur-2xl animate-[drift_7s_ease-in-out_infinite]" />
-        <div className="pointer-events-none absolute -right-8 -bottom-10 h-36 w-36 rounded-full bg-rose-300/25 blur-2xl animate-[drift_9s_ease-in-out_infinite]" />
-
-        <div className="relative flex flex-wrap items-center justify-between gap-4">
-          <p className="m-0 font-['JetBrains_Mono'] text-[0.66rem] font-bold tracking-[0.22em] text-slate-700 uppercase">
-            AI Verification Template
-          </p>
-          <nav className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase md:text-sm">
-            <Link
-              to="/"
-              className="rounded-full border border-slate-900/15 bg-white/45 px-3 py-1.5 text-slate-700 no-underline shadow-sm transition hover:-translate-y-0.5 hover:border-cyan-400/50 hover:bg-cyan-100"
-              activeProps={{ className: 'rounded-full border border-cyan-500/50 bg-cyan-100 px-3 py-1.5 text-cyan-900 no-underline shadow-sm animate-[pulseBorder_2.6s_ease-out_infinite]' }}
-            >
-              Home
-            </Link>
-            <Link
-              to="/todos"
-              search={{ scenario: 'happy' }}
-              className="rounded-full border border-slate-900/15 bg-white/45 px-3 py-1.5 text-slate-700 no-underline shadow-sm transition hover:-translate-y-0.5 hover:border-cyan-400/50 hover:bg-cyan-100"
-              activeProps={{ className: 'rounded-full border border-cyan-500/50 bg-cyan-100 px-3 py-1.5 text-cyan-900 no-underline shadow-sm animate-[pulseBorder_2.6s_ease-out_infinite]' }}
-            >
-              Todos
-            </Link>
-          </nav>
-        </div>
+    <div className="mx-auto max-w-4xl px-4 py-6">
+      <header className="mb-6 border-b border-slate-200 pb-3">
+        <p className="mb-2 text-sm font-semibold">AI Verification Template</p>
+        <nav className="flex gap-4 text-sm">
+          <Link to="/" className="underline" activeProps={{ className: 'underline font-semibold' }}>
+            Home
+          </Link>
+        </nav>
       </header>
 
       <Outlet />

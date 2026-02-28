@@ -4,6 +4,7 @@ This directory stores repo-local tunnel mappings for exposing local apps to
 `*.makon.dev`.
 
 - `apps.json` is committed and defines app -> hostname -> local port mappings.
+- `originHost` in `apps.json` defines the host used in tunnel ingress services.
 - `config.yml` is generated locally by `pnpm tunnel:init` and should not be committed.
 
 ## Workflow
@@ -24,6 +25,21 @@ Add another app mapping:
 ```bash
 pnpm tunnel:add -- --app billing-console --port 3001
 ```
+
+Fast deterministic share (recommended):
+
+```bash
+pnpm share:app -- --app billing-console --port 43101
+```
+
+This performs mapping, managed-config sync, app server start, tunnel restart,
+and URL health checks.
+
+Use high, uncommon ports in `43000-43199` so multiple apps can run at once.
+
+For shared tunnels with multiple connectors, set `originHost` to a LAN IP
+(for example `192.168.0.70`) instead of `127.0.0.1` so requests can resolve
+from any connector host.
 
 ## Troubleshooting
 

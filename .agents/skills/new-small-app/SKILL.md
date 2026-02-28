@@ -3,6 +3,9 @@
 Create and validate a new small app in this monorepo using the canonical
 `apps/tanstack-start-ai-template` blueprint.
 
+The template is intentionally minimal/neutral so each new app can define its
+own visual personality.
+
 ## When to use
 
 Use this whenever the user asks to:
@@ -19,6 +22,12 @@ From repo root:
 pnpm new:app -- --name <app-name>
 pnpm check:app -- --name <app-name>
 pnpm turbo run verify --filter=./apps/<app-name>
+```
+
+URL-first fast path:
+
+```bash
+pnpm new:app:live -- --name <app-name> --port <43xxx>
 ```
 
 Optional install step during bootstrap:
@@ -50,11 +59,13 @@ Examples:
 ## Post-bootstrap workflow
 
 1. Update feature/domain content for the new app.
-2. Run:
+2. If the app has a landing/marketing surface, apply `.agents/skills/frontend-design/SKILL.md` and establish a unique visual identity (do not leave template styling unchanged).
+3. Run:
    - `pnpm --filter ./apps/<app-name> run test`
    - `pnpm --filter ./apps/<app-name> run test:browser`
    - `pnpm --filter ./apps/<app-name> run test:e2e`
-3. If UI changed intentionally, run:
+4. If UI changed intentionally, run:
    - `pnpm --filter ./apps/<app-name> run test:e2e:update`
-4. Final check:
+5. Final check:
    - `pnpm turbo run verify --filter=./apps/<app-name>`
+6. Do not auto-apply TDD/UI-review skills; only use them if user explicitly asks.

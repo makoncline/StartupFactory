@@ -12,12 +12,14 @@
     "test:e2e:update": "turbo run test:e2e:update --filter=./apps/tanstack-start-ai-template",
     "verify": "turbo run verify --filter=./apps/tanstack-start-ai-template",
     "new:app": "node scripts/new-app.mjs",
+    "new:app:live": "node scripts/new-app-live.mjs",
     "check:app": "node scripts/check-app-contract.mjs",
     "tunnel:login": "node scripts/cloudflare-tunnel.mjs login",
     "tunnel:init": "node scripts/cloudflare-tunnel.mjs init",
     "tunnel:add": "node scripts/cloudflare-tunnel.mjs add",
     "tunnel:run": "node scripts/cloudflare-tunnel.mjs run",
-    "tunnel:urls": "node scripts/cloudflare-tunnel.mjs urls"
+    "tunnel:urls": "node scripts/cloudflare-tunnel.mjs urls",
+    "share:app": "node scripts/share-app.mjs"
   },
   "devDependencies": {
     "turbo": "^2.5.8"

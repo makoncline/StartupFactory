@@ -22,6 +22,11 @@ Use this sequence for any new app unless the user explicitly asks for a differen
 5. Confirm public URL responds before further feature work
 6. Then iterate on design/features in small loops
 
+One-command deterministic variant:
+
+- `pnpm new:app:live -- --name <app-name> --port <43xxx>`
+- This performs scaffold + install + placeholder + share + health check.
+
 Rationale: users should get a working URL quickly, then see rapid visible progress.
 
 ## Frontend Guidance
@@ -49,12 +54,22 @@ Rationale: users should get a working URL quickly, then see rapid visible progre
 - `.agents/skills/cloudflare-tunnel/SKILL.md`
   - Use for: exposing local apps to `*.makon.dev` via the shared `startup-factory` Cloudflare Tunnel.
   - Proven useful in: `apps/tanstack-start-ai-template` mapping to `https://tanstack-start-ai-template.makon.dev` with connector cleanup workflow for stable access.
+- `.agents/skills/new-app-delivery-flow/SKILL.md`
+  - Use for: deterministic URL-first app delivery (placeholder first, app second).
+  - Proven useful in: reducing bootstrap time and ambiguity in new app sessions.
+- `.agents/skills/test-driven-development/SKILL.md`
+  - Use for: strict TDD loops.
+  - Activation: only when the user explicitly asks.
+- `.agents/skills/ui-review/SKILL.md`
+  - Use for: structured UI review passes.
+  - Activation: only when the user explicitly asks.
 
 ## Root Commands
 
 - `pnpm verify` runs the full default app verification chain.
 - `pnpm test:e2e:update` updates visual baselines intentionally.
 - `pnpm share:app -- --app <app-name> --port <port>` performs deterministic local app sharing to `*.makon.dev`.
+- `pnpm new:app:live -- --name <app-name> --port <43xxx>` bootstraps and shares a placeholder app URL in one command.
 - Use Turbo filters for specific apps:
   - `pnpm turbo run verify --filter=./apps/<app-name>`
 

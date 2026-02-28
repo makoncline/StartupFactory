@@ -16,11 +16,12 @@ const defaultManifest = {
   zone: 'makon.dev',
   tunnelName: 'startup-factory',
   originCertPath: '.cloudflare/cert.pem',
+  originHost: '127.0.0.1',
   apps: [
     {
       name: 'tanstack-start-ai-template',
       hostname: 'tanstack-start-ai-template.makon.dev',
-      port: 3000,
+      port: 43100,
     },
   ],
 }
@@ -118,6 +119,13 @@ function validateManifest(manifest) {
     fail('Invalid .cloudflare/apps.json: "originCertPath" must be a non-empty string when provided')
   }
 
+  if (
+    manifest.originHost != null &&
+    (typeof manifest.originHost !== 'string' || manifest.originHost.length === 0)
+  ) {
+    fail('Invalid .cloudflare/apps.json: "originHost" must be a non-empty string when provided')
+  }
+
   const seenNames = new Set()
   const seenHosts = new Set()
   for (const app of manifest.apps) {
@@ -208,7 +216,7 @@ function ensureCredentialsFile(tunnelId, originCertPath) {
   return credentialsPath
 }
 
-function writeConfig(manifest, tunnelId, originCertPath) {
+function writeConfig(manifest, tunnelId, originCertPath, originHost) {
   const credentialsPath = ensureCredentialsFile(tunnelId, originCertPath)
 
   const lines = [
@@ -220,7 +228,7 @@ function writeConfig(manifest, tunnelId, originCertPath) {
 
   for (const app of manifest.apps) {
     lines.push(`  - hostname: ${app.hostname}`)
-    lines.push(`    service: http://127.0.0.1:${app.port}`)
+    lines.push(`    service: http://${originHost}:${app.port}`)
   }
   lines.push('  - service: http_status:404')
 
@@ -265,10 +273,84 @@ function ensureDnsRoute(tunnelRef, hostname, originCertPath, expectedTunnelId) {
   }
 }
 
+function readArgoTokenPayload(originCertPath) {
+  const certText = readFileSync(originCertPath, 'utf8')
+  const match = certText.match(/-----BEGIN ARGO TUNNEL TOKEN-----\n([\s\S]*?)\n-----END ARGO TUNNEL TOKEN-----/)
+  if (!match) {
+    fail(
+      [
+        `Could not parse ARGO tunnel token from ${originCertPath}.`,
+        'Run `pnpm tunnel:login` again and ensure login completes successfully.',
+      ].join('\n'),
+    )
+  }
+
+  const encoded = match[1].replace(/\s+/g, '')
+  const decoded = Buffer.from(encoded, 'base64').toString('utf8')
+  return JSON.parse(decoded)
+}
+
+function syncManagedTunnelConfig(manifest, tunnelId, originCertPath, originHost) {
+  const tokenPayload = readArgoTokenPayload(originCertPath)
+  const accountID = tokenPayload.accountID
+  const apiToken = tokenPayload.apiToken
+
+  if (typeof accountID !== 'string' || typeof apiToken !== 'string') {
+    fail(
+      [
+        'Cloudflare login token does not contain accountID/apiToken.',
+        'Run `pnpm tunnel:login` to refresh credentials for this repo.',
+      ].join('\n'),
+    )
+  }
+
+  const ingress = manifest.apps.map((app) => ({
+    hostname: app.hostname,
+    service: `http://${originHost}:${app.port}`,
+  }))
+  ingress.push({ service: 'http_status:404' })
+
+  const requestBody = JSON.stringify({
+    config: {
+      ingress,
+      'warp-routing': { enabled: false },
+    },
+    source: 'cloudflare',
+  })
+
+  const responseText = execFileSync(
+    'curl',
+    [
+      '-sS',
+      '-X',
+      'PUT',
+      '-H',
+      `Authorization: Bearer ${apiToken}`,
+      '-H',
+      'Content-Type: application/json',
+      `https://api.cloudflare.com/client/v4/accounts/${accountID}/cfd_tunnel/${tunnelId}/configurations`,
+      '--data',
+      requestBody,
+    ],
+    { encoding: 'utf8' },
+  )
+
+  const response = JSON.parse(responseText)
+  if (!response.success) {
+    fail(`Failed to sync managed tunnel config:\n${responseText}`)
+  }
+
+  const version = response?.result?.version
+  console.log(`[ tunnel ] Synced managed ingress config (version ${version ?? 'n/a'})`)
+}
+
 function commandInit(args) {
   ensureCloudflaredInstalled()
   const manifest = loadManifest()
   const originCertPath = resolveOriginCertPath(manifest, args)
+  const originHost = typeof args['origin-host'] === 'string' && args['origin-host'].length > 0
+    ? args['origin-host']
+    : (manifest.originHost ?? '127.0.0.1')
 
   if (!existsSync(originCertPath)) {
     fail(
@@ -291,11 +373,14 @@ function commandInit(args) {
     manifest.tunnelName = args.tunnel
   }
 
+  manifest.originHost = originHost
+
   validateManifest(manifest)
   saveManifest(manifest)
 
   const tunnelId = ensureTunnel(manifest.tunnelName, originCertPath)
-  writeConfig(manifest, tunnelId, originCertPath)
+  writeConfig(manifest, tunnelId, originCertPath, originHost)
+  syncManagedTunnelConfig(manifest, tunnelId, originCertPath, originHost)
 
   console.log(`[ tunnel ] Routing DNS for ${manifest.apps.length} app(s)...`)
   for (const app of manifest.apps) {
@@ -322,9 +407,15 @@ function commandAdd(args) {
   if (!Number.isInteger(port) || port <= 0) {
     fail('Missing or invalid --port <number>')
   }
+  if (port < 43000 || port > 43199) {
+    fail('Use a high deterministic port in 43000-43199 for tunnel app mappings')
+  }
 
   const manifest = loadManifest()
   const originCertPath = resolveOriginCertPath(manifest, args)
+  const originHost = typeof args['origin-host'] === 'string' && args['origin-host'].length > 0
+    ? args['origin-host']
+    : (manifest.originHost ?? '127.0.0.1')
 
   if (!existsSync(originCertPath)) {
     fail(
@@ -337,6 +428,7 @@ function commandAdd(args) {
   if (typeof args.tunnel === 'string' && args.tunnel.length > 0) {
     manifest.tunnelName = args.tunnel
   }
+  manifest.originHost = originHost
 
   const hostname = typeof args.hostname === 'string' && args.hostname.length > 0
     ? args.hostname
@@ -360,7 +452,8 @@ function commandAdd(args) {
     return
   }
 
-  writeConfig(manifest, tunnel.id, originCertPath)
+  writeConfig(manifest, tunnel.id, originCertPath, originHost)
+  syncManagedTunnelConfig(manifest, tunnel.id, originCertPath, originHost)
   ensureDnsRoute(tunnel.id, hostname, originCertPath, tunnel.id)
   console.log(`[ tunnel ] Added mapping ${appName} -> https://${hostname} (localhost:${port})`)
 }
@@ -403,13 +496,15 @@ function commandRun() {
 
 function commandUrls() {
   const manifest = loadManifest()
+  const originHost = manifest.originHost ?? '127.0.0.1'
   console.log(`[ tunnel ] Zone: ${manifest.zone}`)
   console.log(`[ tunnel ] Tunnel: ${manifest.tunnelName}`)
+  console.log(`[ tunnel ] Origin host: ${originHost}`)
   console.log('')
   for (const app of manifest.apps) {
     console.log(`${app.name}`)
     console.log(`  public: https://${app.hostname}`)
-    console.log(`  local:  http://127.0.0.1:${app.port}`)
+    console.log(`  local:  http://${originHost}:${app.port}`)
   }
 }
 
@@ -429,6 +524,7 @@ function commandHelp() {
   console.log('  --app <name>        App name for add')
   console.log('  --port <port>       Local port for add')
   console.log('  --hostname <host>   Public hostname for add')
+  console.log('  --origin-host <ip>  Origin host used in tunnel ingress services')
 }
 
 const args = parseArgs(process.argv.slice(2))

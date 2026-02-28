@@ -12,6 +12,10 @@
 | 2026-02-27 | self | Turbo `verify` task depended on `typecheck/test/test:browser/test:e2e` while app `verify` script also ran all of them, causing duplicate parallel e2e and flaky webServer failures. | Make Turbo `verify` run only the app `verify` script (no dependsOn duplication). |
 | 2026-02-27 | self | Playwright `reuseExistingServer` + prior test chain produced intermittent `ERR_CONNECTION_REFUSED/ERR_EMPTY_RESPONSE` in `npm run verify`. | Keep Playwright webServer isolated (`reuseExistingServer: false`) and kill port 3000 in pre-`test:e2e` scripts. |
 | 2026-02-27 | self | Cloudflare tunnel DNS routing silently targeted the wrong zone/account due existing `cloudflared login` cert scope. | Verify CNAME after route creation and require `cloudflared tunnel login` against the intended zone before `tunnel:init`. |
+| 2026-02-27 | self | Shared tunnel with multiple connectors caused intermittent `502` when ingress services pointed to `127.0.0.1`. | Use `.cloudflare/apps.json` `originHost` with LAN IP and sync managed config so all connectors can reach the same origin host. |
+| 2026-02-27 | self | Ran app `typecheck` immediately after scaffolding and `tsc` was missing for the new workspace package. | Run `pnpm install` after `pnpm new:app` before any per-app scripts. |
+| 2026-02-27 | self | Put a Google Fonts `@import` after `@import "tailwindcss"`, which made Vite/PostCSS fail (`@import must precede all other statements`). | Keep any external CSS `@import` lines before the Tailwind import in app stylesheets. |
+| 2026-02-27 | self | Left a manual Vite server running on `:3000`, which caused Playwright webServer startup to fail with no useful test output. | Before e2e runs, always check/kill listeners on `:3000` when troubleshooting startup failures. |
 
 ## User Preferences
 
@@ -22,6 +26,9 @@
 - Avoid card-heavy layouts; use cards only when they convey truly separate content.
 - Promote hard-won lessons into `AGENTS.md`; promote repeatable workflows into repo skills and track their proven use-cases in `AGENTS.md`.
 - Capture Cloudflare tunnel setup/cleanup as a repo skill so future app sharing is one-command predictable.
+- New app process priority: URL live placeholder first, full app second; make this deterministic (`new:app:live`) to reduce agent-to-agent variance.
+- Only apply TDD/UI-review skills when explicitly requested by the user.
+- For new apps, prioritize shipping a hello-world/placeholder page to a working `*.makon.dev` URL first, then iterate on full UI/features.
 
 ## Patterns That Work
 

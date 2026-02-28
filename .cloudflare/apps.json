@@ -2,11 +2,12 @@
   "zone": "makon.dev",
   "tunnelName": "startup-factory",
   "originCertPath": ".cloudflare/cert.pem",
+  "originHost": "192.168.0.70",
   "apps": [
     {
       "name": "tanstack-start-ai-template",
       "hostname": "tanstack-start-ai-template.makon.dev",
-      "port": 3000
+      "port": 43100
     }
   ]
 }
